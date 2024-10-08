@@ -27,7 +27,8 @@ class Connection
             $category = $_POST['category'];
             $price = $_POST['price'];
             $quantity = $_POST['quantity'];
-            $created_at = $_POST['created_at'];isset($_POST['created_at']) && !empty($_POST['created_at']) ? $_POST['created_at'] : date('Y-m-d H:i:s');
+            $created_at = $_POST['created_at'];
+            isset($_POST['created_at']) && !empty($_POST['created_at']) ? $_POST['created_at'] : date('Y-m-d H:i:s');
 
 
             try {
@@ -51,40 +52,42 @@ class Connection
         }
     }
 
-    public function editStudent() {
+    public function editStudent()
+    {
         if (isset($_POST['edit_product'])) {
 
             $product_id = $_POST['product_id'];
-    
+
             $product_name = $_POST['product_name'];
             $category = $_POST['category'];
             $price = $_POST['price'];
             $quantity = $_POST['quantity'];
             $created_at = $_POST['created_at'];
-    
+
             try {
                 $connection = $this->openConnection();
                 $query = "UPDATE products_table SET product_name = ?, category = ?, price = ?, quantity = ?, created_at = ? WHERE product_id = ?";
                 $stmt = $connection->prepare($query);
                 $stmt->execute([$product_name, $category, $price, $quantity, $created_at, $product_id]);
-    
+
                 session_start();
                 $_SESSION["out"] = "Product edit successfully";
-    
+
                 header("Location: index.php");
                 exit();
             } catch (PDOException $e) {
                 session_start();
                 $_SESSION["error"] = "Error: " . $e->getMessage();
-    
+
                 header("Location: index.php");
                 exit();
             }
         }
-    }    
+    }
 
-    public function deleteProduct(){
-        if(isset($_POST['delete_product'])){
+    public function deleteProduct()
+    {
+        if (isset($_POST['delete_product'])) {
             $product_id = $_POST['delete_product'];
 
             try {
@@ -95,16 +98,65 @@ class Connection
 
                 session_start();
                 $_SESSION["out"] = "Product deleted successfully";
-                
+
                 header("Location: index.php");
                 exit();
             } catch (PDOException $e) {
                 session_start();
                 $_SESSION["error"] = "Error: " . $e->getMessage();
-        
+
                 header("Location: index.php");
                 exit();
             }
+        }
+    }
+
+    public function searchProducts()
+    {
+        if (isset($_POST['search_btn'])) {
+            $searchTerm = trim($_POST['search_input']);
+
+            if (empty($searchTerm)) {
+                return $this->getAllProducts();
+            }
+
+            try {
+                $connection = $this->openConnection();
+                $searchTerm = "%" . $searchTerm . "%";
+                $stmt = $connection->prepare('SELECT * FROM products_table WHERE product_id LIKE :searchTerm or product_name LIKE :searchTerm OR category LIKE :searchTerm OR price LIKE :searchTerm OR quantity LIKE :searchTerm OR created_at LIKE :searchTerm');
+                $stmt->bindParam(':searchTerm', $searchTerm);
+                $stmt->execute();
+                $result = $stmt->fetchAll();
+
+                if (empty($result)) {
+                    return $this->getAllProducts();
+                }
+
+                return $result;
+            } catch (PDOException $e) {
+                session_start();
+                $_SESSION["error"] = "Error: " . $e->getMessage();
+
+                header("Location: index.php");
+                exit();
+            }
+        }
+
+        return $this->getAllProducts();
+    }
+
+    private function getAllProducts()
+    {
+        try {
+            $connection = $this->openConnection();
+            $stmt = $connection->prepare('SELECT * FROM products_table');
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            session_start();
+            $_SESSION["error"] = "Error: " . $e->getMessage();
+            header("Location: index.php");
+            exit();
         }
     }
 }

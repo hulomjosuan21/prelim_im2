@@ -3,6 +3,7 @@ require_once('connection.php');
 $newConnection->addProduct();
 $newConnection->editStudent();
 $newConnection->deleteProduct();
+$products = $newConnection->searchProducts();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +13,7 @@ $newConnection->deleteProduct();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <link rel="stylesheet" href="style.css">
     <title>Prelim</title>
 </head>
@@ -26,10 +28,9 @@ $newConnection->deleteProduct();
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 </ul>
-                <form class="d-flex" role="search">
-                    <button class="btn btn-outline-success me-2" type="submit">Filter</button>
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
+                <form class="d-flex" role="search" action="" method="POST">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_input">
+                    <button class="btn btn-outline-success" type="submit" name="search_btn">Search</button>
                 </form>
             </div>
         </div>
@@ -78,13 +79,21 @@ $newConnection->deleteProduct();
         </div>
     </div>
 
-    <div class="container d-flex justify-content-center">
+    <div class="container d-flex justify-content-between mt-2 mb-2">
+        <div>
+            <select class="form-select" aria-label="Default select example">
+                <option selected disabled>Filter Option</option>
+                <option value="1">One</option>
+                <option value="2">Two</option>
+                <option value="3">Three</option>
+            </select>
+        </div>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
             <i class="fa-solid fa-bag-shopping"></i> Add Products
         </button>
     </div>
 
-    <main class="container mt-5">
+    <main class="container">
         <table class="table">
             <thead>
                 <tr>
@@ -100,33 +109,31 @@ $newConnection->deleteProduct();
             </thead>
             <tbody>
                 <?php
-                $connection = $newConnection->openConnection();
-                $stmt = $connection->prepare('SELECT * FROM products_table');
-                $stmt->execute();
-                $result = $stmt->fetchAll();
-
-                foreach ($result as $row) {
+                if (!empty($products)) {
+                    foreach ($products as $row) {
                 ?>
-                    <tr>
-                        <th scope="row"><?= $row->product_id ?></th>
-                        <td><?= $row->product_name ?></td>
-                        <td><?= $row->category ?></td>
-                        <td>₱ <?= $row->price ?></td>
-                        <td><?= $row->quantity ?>x</td>
-                        <td><?= $row->created_at ?></td>
-                        <td>
-                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row->product_id ?>"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        </td>
-                        <td>
-                            <form action="" method="POST">
-                                <button class="btn btn-danger" value="<?php echo $row->product_id ?>" name="delete_product"><i class="fa-solid fa-trash"></i> Delete</button>
-                            </form>
-                        </td>
-                        <?php include('edit_modal.php') ?>
-                    </tr>
+                        <tr>
+                            <th scope="row"><?= $row->product_id ?></th>
+                            <td><?= $row->product_name ?></td>
+                            <td><?= $row->category ?></td>
+                            <td>₱ <?= $row->price ?></td>
+                            <td><?= $row->quantity ?>x</td>
+                            <td><?= $row->created_at ?></td>
+                            <td>
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row->product_id ?>"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                            </td>
+                            <td>
+                                <form action="" method="POST">
+                                    <button class="btn btn-danger" value="<?php echo $row->product_id ?>" name="delete_product"><i class="fa-solid fa-trash"></i> Delete</button>
+                                </form>
+                            </td>
+                            <?php include('edit_modal.php') ?>
+                        </tr>
                 <?php
+                    }
+                } else {
+                    echo "<tr><td colspan='8'>No products found.</td></tr>";
                 }
-
                 ?>
 
             </tbody>
