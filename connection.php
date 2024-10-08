@@ -9,6 +9,17 @@ class Connection
     private $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ];
     protected $conn;
 
+    public $gategory_list =  [
+        "Electronics",
+        "Clothing",
+        "Home & Kitchen",
+        "Beauty",
+        "Sports & Outdoors",
+        "Books",
+        "Toys",
+        "Automotive"
+    ];
+
     public function openConnection(): PDO
     {
         try {
@@ -145,7 +156,99 @@ class Connection
         return $this->getAllProducts();
     }
 
-    private function getAllProducts()
+    public function filterProducts()
+    {
+        if (isset($_POST['filter_btn'])) {
+            $searchTerm = trim($_POST['filter_input']);
+
+            if (empty($searchTerm)) {
+                return $this->getAllProducts();
+            }
+
+            try {
+                $connection = $this->openConnection();
+
+                if ($searchTerm === "In Stock") {
+                    $stmt = $connection->prepare('SELECT * FROM products_table WHERE quantity > 0');
+                } elseif ($searchTerm === "Out Stock") {
+                    $stmt = $connection->prepare('SELECT * FROM products_table WHERE quantity = 0');
+                } elseif ($searchTerm === "All") {
+                    return $this->getAllProducts();
+                } else {
+                    $searchTerm = "%" . $searchTerm . "%";
+                    $stmt = $connection->prepare('SELECT * FROM products_table WHERE category LIKE :searchTerm');
+                    $stmt->bindParam(':searchTerm', $searchTerm);
+                }
+
+                $stmt->execute();
+                $result = $stmt->fetchAll();
+
+                if (empty($result)) {
+                    return $this->getAllProducts();
+                }
+
+                return $result;
+            } catch (PDOException $e) {
+                session_start();
+                $_SESSION["error"] = "Error: " . $e->getMessage();
+                header("Location: index.php");
+                exit();
+            }
+        }
+
+        return $this->getAllProducts();
+    }
+
+    public function filterByDate()
+    {
+        if (!isset($_POST['filterDate_btn'])) {
+            return $this->getAllProducts();
+        }
+
+        $startDate = trim($_POST['start_date']);
+        $endDate = trim($_POST['end_date']);
+
+        if (empty($startDate) && empty($endDate)) {
+            return $this->getAllProducts();
+        }
+
+        try {
+            $connection = $this->openConnection();
+            $query = 'SELECT * FROM products_table WHERE 1=1';
+
+            if (!empty($startDate) && !empty($endDate)) {
+                $query .= ' AND created_at BETWEEN :startDate AND :endDate';
+                $stmt = $connection->prepare($query);
+                $stmt->bindParam(':startDate', $startDate);
+                $stmt->bindParam(':endDate', $endDate);
+            } elseif (!empty($startDate)) {
+                $query .= ' AND created_at >= :startDate';
+                $stmt = $connection->prepare($query);
+                $stmt->bindParam(':startDate', $startDate);
+            } elseif (!empty($endDate)) {
+                $query .= ' AND created_at <= :endDate';
+                $stmt = $connection->prepare($query);
+                $stmt->bindParam(':endDate', $endDate);
+            }
+
+            $stmt->execute();
+            $result = $stmt->fetchAll();
+
+            if (empty($result)) {
+                return $this->getAllProducts();
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            session_start();
+            $_SESSION["error"] = "Error: " . $e->getMessage();
+            header("Location: index.php");
+            exit();
+        }
+    }
+
+
+    public function getAllProducts()
     {
         try {
             $connection = $this->openConnection();

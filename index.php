@@ -3,7 +3,21 @@ require_once('connection.php');
 $newConnection->addProduct();
 $newConnection->editStudent();
 $newConnection->deleteProduct();
-$products = $newConnection->searchProducts();
+$products = $newConnection->getAllProducts(); // Start with all products
+
+if (isset($_POST['search_btn']) && !empty($_POST['search_input'])) {
+    $products = $newConnection->searchProducts();
+}
+
+if (isset($_POST['filterDate_btn'])) {
+    $products = $newConnection->filterByDate();
+}
+
+if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
+    $products = $newConnection->filterProducts();
+}
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,8 +27,8 @@ $products = $newConnection->searchProducts();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <link rel="stylesheet" href="style.css">
+
     <title>Prelim</title>
 </head>
 
@@ -51,14 +65,13 @@ $products = $newConnection->searchProducts();
                         <div class="mb-3">
                             <select class="form-select" aria-label="Default select example" name="category">
                                 <option selected disabled>Open this category menu</option>
-                                <option value="Electronics">Electronics</option>
-                                <option value="Clothing">Clothing</option>
-                                <option value="Home & Kitchen">Home & Kitchen</option>
-                                <option value="Beauty">Beauty</option>
-                                <option value="Sports & Outdoors">Sports & Outdoors</option>
-                                <option value="Books">Books</option>
-                                <option value="Toys">Toys</option>
-                                <option value="Automotive">Automotive</option>
+                                <?php
+                                foreach ($newConnection->gategory_list as $gategory) {
+                                ?>
+                                    <option value="<?= $gategory ?>"><?= $gategory ?></option>
+                                <?php
+                                }
+                                ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -81,13 +94,34 @@ $products = $newConnection->searchProducts();
 
     <div class="container d-flex justify-content-between mt-2 mb-2">
         <div>
-            <select class="form-select" aria-label="Default select example">
-                <option selected disabled>Filter Option</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
-            </select>
+            <form action="" method="POST" class="d-flex align-items-center">
+                <select class="form-select me-2" aria-label="Default select example" style="width: auto;" name="filter_input">
+                    <option selected disabled>Filter Option</option>
+                    <option value="All">All Products</option>
+                    <?php
+                    foreach ($newConnection->gategory_list as $gategory) {
+                    ?>
+                        <option value="<?= $gategory ?>"><?= $gategory ?></option>
+                    <?php
+                    }
+                    ?>
+                    <option value="In Stock">In Stock</option>
+                    <option value="Out Stock">Out Stock</option>
+                </select>
+                <button type="submit" class="btn btn-secondary" name="filter_btn">Filter</button>
+            </form>
         </div>
+
+        <form action="" method="POST" class="d-flex align-items-center gap-2">
+            <div>
+                <input type="text" class="form-control" id="emailInput1" placeholder="From" name="start_date">
+            </div>
+            <div>
+                <input type="text" class="form-control" id="emailInput2" placeholder="To" name="end_date">
+            </div>
+            <button type="submit" class="btn btn-secondary" name="filterDate_btn">Submit Range</button>
+        </form>
+
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
             <i class="fa-solid fa-bag-shopping"></i> Add Products
         </button>

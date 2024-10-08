@@ -14,14 +14,14 @@
                     <div class="mb-3">
                         <select class="form-select" aria-label="Default select example" name="category">
                             <option selected disabled>Open this category menu</option>
-                            <option value="Electronics">Electronics</option>
-                            <option value="Clothing">Clothing</option>
-                            <option value="Home & Kitchen">Home & Kitchen</option>
-                            <option value="Beauty">Beauty</option>
-                            <option value="Sports & Outdoors">Sports & Outdoors</option>
-                            <option value="Books">Books</option>
-                            <option value="Toys">Toys</option>
-                            <option value="Automotive">Automotive</option>
+                            <?php
+                            foreach ($newConnection->gategory_list as $gategory) {
+                                $selected = ($gategory == $row->category) ? 'selected' : '';
+                            ?>
+                                <option value="<?= $gategory ?>" <?= $selected ?>><?= $gategory ?></option>
+                            <?php
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="mb-3">
