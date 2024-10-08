@@ -33,9 +33,14 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    <nav class="navbar navbar-expand-lg bg-transparent">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Prelim Hulom</a>
+            <a class="navbar-brand fw-bold text-white" href="#">Prelim Hulom</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -44,7 +49,7 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                 </ul>
                 <form class="d-flex" role="search" action="" method="POST">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_input">
-                    <button class="btn btn-outline-success" type="submit" name="search_btn">Search</button>
+                    <button class="btn btn-success" type="submit" name="search_btn">Search</button>
                 </form>
             </div>
         </div>
@@ -108,7 +113,7 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                     <option value="In Stock">In Stock</option>
                     <option value="Out Stock">Out Stock</option>
                 </select>
-                <button type="submit" class="btn btn-secondary" name="filter_btn">Filter</button>
+                <button type="submit" class="btn btn-dark" name="filter_btn">Apply Filter</button>
             </form>
         </div>
 
@@ -119,7 +124,7 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
             <div>
                 <input type="text" class="form-control" id="emailInput2" placeholder="To" name="end_date">
             </div>
-            <button type="submit" class="btn btn-secondary" name="filterDate_btn">Submit Range</button>
+            <button type="submit" class="btn btn-dark" name="filterDate_btn">Apply Date Range</button>
         </form>
 
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -128,7 +133,7 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
     </div>
 
     <main class="container">
-        <table class="table">
+        <table class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th scope="col">Product Id</th>
@@ -138,7 +143,6 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                     <th scope="col">Quantity</th>
                     <th scope="col">Date Purchase</th>
                     <th scope="col">Actions</th>
-                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -153,12 +157,10 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                             <td>₱ <?= $row->price ?></td>
                             <td><?= $row->quantity ?>x</td>
                             <td><?= $row->created_at ?></td>
-                            <td>
-                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row->product_id ?>"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            </td>
-                            <td>
+                            <td class="d-flex gap-2 justify-content-center">
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row->product_id ?>"><i class="fa-solid fa-pen-to-square"></i></button>
                                 <form action="" method="POST">
-                                    <button class="btn btn-danger" value="<?php echo $row->product_id ?>" name="delete_product"><i class="fa-solid fa-trash"></i> Delete</button>
+                                    <button class="btn btn-danger" value="<?php echo $row->product_id ?>" name="delete_product"><i class="fa-solid fa-trash"></i></button>
                                 </form>
                             </td>
                             <?php include('edit_modal.php') ?>
