@@ -1,7 +1,7 @@
 <?php
 require_once('connection.php');
 $newConnection->addProduct();
-$newConnection->editStudent();
+$newConnection->editProduct();
 $newConnection->deleteProduct();
 $products = $newConnection->getAllProducts(); // Start with all products
 
@@ -33,6 +33,8 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
 </head>
 
 <body>
+
+
     <div>
         <div class="wave"></div>
         <div class="wave"></div>
@@ -97,6 +99,21 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
         </div>
     </div>
 
+    <div class="container">
+        <?php
+        if (isset($_SESSION["create"])) {
+        ?>
+            <div class="alert alert-success">
+                <?php
+                echo $_SESSION["create"];
+                unset($_SESSION["create"]);
+                ?>
+            </div>
+        <?php
+        }
+        ?>
+    </div>
+
     <div class="container d-flex justify-content-between mt-2 mb-2">
         <div>
             <form action="" method="POST" class="d-flex align-items-center">
@@ -141,6 +158,7 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                     <th scope="col">Category</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
+                    <th scope="col">Stock</th>
                     <th scope="col">Date Purchase</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -156,6 +174,16 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                             <td><?= $row->category ?></td>
                             <td>₱ <?= $row->price ?></td>
                             <td><?= $row->quantity ?>x</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked"
+                                        <?php if ($row->quantity > 0) echo 'checked'; ?> disabled>
+                                    <label class="form-check-label" for="flexCheckChecked">
+                                        <?= ($row->quantity > 0) ? 'In Stock' : 'Out of Stock'; ?>
+                                    </label>
+                                </div>
+
+                            </td>
                             <td><?= $row->created_at ?></td>
                             <td class="d-flex gap-2 justify-content-center">
                                 <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row->product_id ?>"><i class="fa-solid fa-pen-to-square"></i></button>

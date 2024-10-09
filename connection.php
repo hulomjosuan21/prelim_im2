@@ -1,6 +1,6 @@
 <?php
 $newConnection = new Connection();
-
+session_start();
 class Connection
 {
     private $server = "mysql:host=localhost;dbname=prelim";
@@ -47,10 +47,7 @@ class Connection
                 $query = "INSERT INTO products_table (`product_name`, `category`, `price`, `quantity`, `created_at`) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $connection->prepare($query);
                 $stmt->execute([$product_name, $category, $price, $quantity, $created_at]);
-
-                session_start();
                 $_SESSION["create"] = "Product added successfully";
-
                 header("Location: index.php");
                 exit();
             } catch (PDOException $e) {
@@ -63,7 +60,7 @@ class Connection
         }
     }
 
-    public function editStudent()
+    public function editProduct()
     {
         if (isset($_POST['edit_product'])) {
 
@@ -81,9 +78,7 @@ class Connection
                 $stmt = $connection->prepare($query);
                 $stmt->execute([$product_name, $category, $price, $quantity, $created_at, $product_id]);
 
-                session_start();
-                $_SESSION["out"] = "Product edit successfully";
-
+                $_SESSION["create"] = "Product updated successfully";
                 header("Location: index.php");
                 exit();
             } catch (PDOException $e) {
@@ -107,9 +102,7 @@ class Connection
                 $stmt = $connection->prepare($query);
                 $stmt->execute(["product_id" => $product_id]);
 
-                session_start();
-                $_SESSION["out"] = "Product deleted successfully";
-
+                $_SESSION["create"] = "Product id:$product_id deleted successfully";
                 header("Location: index.php");
                 exit();
             } catch (PDOException $e) {
