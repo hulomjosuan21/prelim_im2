@@ -9,17 +9,6 @@ class Connection
     private $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ];
     protected $conn;
 
-    public $gategory_list =  [
-        "Electronics",
-        "Clothing",
-        "Home & Kitchen",
-        "Beauty",
-        "Sports & Outdoors",
-        "Books",
-        "Toys",
-        "Automotive"
-    ];
-
     public function openConnection(): PDO
     {
         try {
@@ -27,6 +16,69 @@ class Connection
             return $this->conn;
         } catch (PDOException $e) {
             echo "There is a problem is the connection: " . $e->getMessage();
+        }
+    }
+    public function listOfCategories()
+    {
+        if (!$this->conn) {
+            $this->openConnection();
+        }
+
+        $query = "SELECT category_id, category_name FROM category_table";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        $categories = $stmt->fetchAll();
+
+        return $categories;
+    }
+
+    public function getCategoryNameById($id)
+    {
+        $query = "SELECT category_name FROM category_table WHERE category_id = :id";
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        $category = $stmt->fetch(PDO::FETCH_OBJ);
+
+        return $category ? $category->category_name : null;
+    }
+
+    public function addCategory()
+    {
+        if (isset($_POST['add_category'])) {
+            $category_name = trim($_POST['category_name']);
+
+            if (empty($category_name)) {
+                $_SESSION["error"] = "Category name cannot be empty.";
+                header("Location: index.php");
+                exit();
+            }
+
+            try {
+                $connection = $this->openConnection();
+                $query = "INSERT INTO category_table (category_name) VALUES (:category_name)";
+                $stmt = $connection->prepare($query);
+
+                $stmt->bindParam(':category_name', $category_name, PDO::PARAM_STR);
+
+                $stmt->execute();
+
+                $_SESSION["create"] = "Category added successfully";
+                header("Location: index.php");
+                exit();
+            } catch (PDOException $e) {
+                if (session_status() == PHP_SESSION_NONE) {
+                    session_start();
+                }
+
+                $_SESSION["error"] = "Error: " . $e->getMessage();
+                header("Location: index.php");
+                exit();
+            }
         }
     }
 
@@ -44,7 +96,7 @@ class Connection
 
             try {
                 $connection = $this->openConnection();
-                $query = "INSERT INTO products_table (`product_name`, `category`, `price`, `quantity`, `created_at`) VALUES (?, ?, ?, ?, ?)";
+                $query = "INSERT INTO products_table (`product_name`, `category_id`, `price`, `quantity`, `created_at`) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $connection->prepare($query);
                 $stmt->execute([$product_name, $category, $price, $quantity, $created_at]);
                 $_SESSION["create"] = "Product added successfully";
@@ -74,7 +126,7 @@ class Connection
 
             try {
                 $connection = $this->openConnection();
-                $query = "UPDATE products_table SET product_name = ?, category = ?, price = ?, quantity = ?, created_at = ? WHERE product_id = ?";
+                $query = "UPDATE products_table SET product_name = ?, category_id = ?, price = ?, quantity = ?, created_at = ? WHERE product_id = ?";
                 $stmt = $connection->prepare($query);
                 $stmt->execute([$product_name, $category, $price, $quantity, $created_at, $product_id]);
 

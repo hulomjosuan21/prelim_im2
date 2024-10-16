@@ -15,10 +15,9 @@
                         <select class="form-select" aria-label="Default select example" name="category">
                             <option selected disabled>Open this category menu</option>
                             <?php
-                            foreach ($newConnection->gategory_list as $gategory) {
-                                $selected = ($gategory == $row->category) ? 'selected' : '';
+                            foreach ($category_list as $gategory) {
                             ?>
-                                <option value="<?= $gategory ?>" <?= $selected ?>><?= $gategory ?></option>
+                                <option value="<?= $gategory->category_id  ?>"><?= $gategory->category_name ?></option>
                             <?php
                             }
                             ?>

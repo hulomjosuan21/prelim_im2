@@ -3,7 +3,9 @@ require_once('connection.php');
 $newConnection->addProduct();
 $newConnection->editProduct();
 $newConnection->deleteProduct();
-$products = $newConnection->getAllProducts(); // Start with all products
+$newConnection->addCategory();
+$products = $newConnection->getAllProducts();
+$category_list =  $newConnection->listOfCategories();
 
 if (isset($_POST['search_btn']) && !empty($_POST['search_input'])) {
     $products = $newConnection->searchProducts();
@@ -33,18 +35,42 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
 </head>
 
 <body>
-
-
     <div>
         <div class="wave"></div>
         <div class="wave"></div>
         <div class="wave"></div>
     </div>
+
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="" method="POST">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="addCategoryModalLabel">Add Category</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="exampleFormControlInput1" name="category_name">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" name="add_category">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar navbar-expand-lg bg-transparent">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-white" href="#">Prelim Hulom</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
+            </button>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                Add Category
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -73,9 +99,9 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                             <select class="form-select" aria-label="Default select example" name="category">
                                 <option selected disabled>Open this category menu</option>
                                 <?php
-                                foreach ($newConnection->gategory_list as $gategory) {
+                                foreach ($category_list as $gategory) {
                                 ?>
-                                    <option value="<?= $gategory ?>"><?= $gategory ?></option>
+                                    <option value="<?= $gategory->category_id  ?>"><?= $gategory->category_name ?></option>
                                 <?php
                                 }
                                 ?>
@@ -114,6 +140,24 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
         ?>
     </div>
 
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container d-flex justify-content-between mt-2 mb-2">
         <div>
             <form action="" method="POST" class="d-flex align-items-center">
@@ -121,9 +165,9 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                     <option selected disabled>Filter Option</option>
                     <option value="All">All Products</option>
                     <?php
-                    foreach ($newConnection->gategory_list as $gategory) {
+                    foreach ($category_list as $gategory) {
                     ?>
-                        <option value="<?= $gategory ?>"><?= $gategory ?></option>
+                        <option value="<?= $gategory->category_name ?>"><?= $gategory->category_name ?></option>
                     <?php
                     }
                     ?>
@@ -158,7 +202,6 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                     <th scope="col">Category</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
-                    <th scope="col">Stock</th>
                     <th scope="col">Date Purchase</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -171,18 +214,22 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
                         <tr>
                             <th scope="row"><?= $row->product_id ?></th>
                             <td><?= $row->product_name ?></td>
-                            <td><?= $row->category ?></td>
+                            <td><?= htmlspecialchars($newConnection->getCategoryNameById($row->category_id)) ?></td>
                             <td>₱ <?= $row->price ?></td>
-                            <td><?= $row->quantity ?>x</td>
                             <td>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked"
                                         <?php if ($row->quantity > 0) echo 'checked'; ?> disabled>
                                     <label class="form-check-label" for="flexCheckChecked">
-                                        <?= ($row->quantity > 0) ? 'In Stock' : 'Out of Stock'; ?>
+                                        <?php if ($row->quantity > 0): ?>
+                                            In Stock <?= $row->quantity ?>x
+                                        <?php else: ?>
+                                            Out of Stock <?= $row->quantity ?>x
+                                        <?php endif; ?>
                                     </label>
                                 </div>
 
+                            </td>
                             </td>
                             <td><?= $row->created_at ?></td>
                             <td class="d-flex gap-2 justify-content-center">
