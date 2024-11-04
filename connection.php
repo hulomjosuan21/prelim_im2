@@ -307,4 +307,66 @@ class Connection
             exit();
         }
     }
+
+    public function registerUser()
+    {
+        $connection = $this->openConnection();
+        if (isset($_POST['register_user'])) {
+            $firstname = $_POST['firstname'];
+            $lastname = $_POST['lastname'];
+            $address = $_POST['address'];
+            $birthday = $_POST['bday'];
+            $gender = $_POST['gender'];
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+            $role = 'user';
+
+            $stmt = $connection->prepare('INSERT INTO user_table (first_name, last_name, address, birthdate, gender, username, password, role) VALUES (:first_name, :last_name, :address, :birthdate, :gender, :username, :password, :role)');
+
+            $result = $stmt->execute([
+                'first_name' => $firstname,
+                'last_name' => $lastname,
+                'address' => $address,
+                'birthdate' => $birthday,
+                'gender' => $gender,
+                'username' => $username,
+                'password' => $password,
+                'role' => $role,
+            ]);
+
+            if ($result) {
+                $_SESSION['name'] = $firstname;
+                header('Location: index.php');
+            } else {
+                header('Location: login.php');
+            }
+        }
+    }
+
+    public function userLogin()
+    {
+        $connection = $this->openConnection();
+        if (isset($_POST['user_login'])) {
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+
+            $user = $connection->prepare('SELECT * FROM user_table WHERE username=:username AND password=:password');
+            $user->execute(['username' => $username, 'password' => $password]);
+            $result = $user->fetch();
+            if ($result) {
+                $_SESSION['name'] = $username;
+                header('Location: index.php');
+            } else {
+                header('Location: login.php');
+            }
+        }
+    }
+
+    public function useLogout()
+    {
+        if (isset($_POST['user_out'])) {
+            session_destroy();
+            header('Location: login.php');
+        }
+    }
 }

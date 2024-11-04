@@ -4,6 +4,7 @@ $newConnection->addProduct();
 $newConnection->editProduct();
 $newConnection->deleteProduct();
 $newConnection->addCategory();
+$newConnection->useLogout();
 $products = $newConnection->getAllProducts();
 $category_list =  $newConnection->listOfCategories();
 
@@ -19,6 +20,9 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
     $products = $newConnection->filterProducts();
 }
 
+if (!isset($_SESSION['name'])) {
+    header('Location: login.php');
+}
 
 ?>
 <!DOCTYPE html>
@@ -65,13 +69,18 @@ if (isset($_POST['filter_btn']) && !empty($_POST['filter_input'])) {
 
     <nav class="navbar navbar-expand-lg bg-transparent">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-white" href="#">Prelim Hulom</a>
+            <a class="navbar-brand fw-bold text-white" href="#"><?= $_SESSION['name'] ?></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
                 Add Category
             </button>
+            <form action="" method="post">
+                <button type="submit" name="user_out" class="btn btn-success ms-5" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    Logout
+                </button>
+            </form>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 </ul>
